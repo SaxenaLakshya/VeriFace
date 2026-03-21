@@ -1,0 +1,1 @@
+# VeriFace: An API platform for detecting low quality AI-generated images
