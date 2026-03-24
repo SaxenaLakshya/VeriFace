@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import multer from "multer";
+import axios, { AxiosResponse } from "axios";
 import { client as supabase } from "./supabase/client";
 import { ClerkData } from "./types/types";
 
@@ -18,10 +19,10 @@ app.get("/", async (req: Request, res: Response) => {
         const { data, error } = await supabase.storage.getBucket("images");
         let dbStatus: string = (error) ? "DB is currently down!" : "DB is running healthy!";
 
-        return res.json({
+        return res.status(200).json({
             "serverMessage": "Server is running",
             "dbMessage": dbStatus,
-        }).sendStatus(200);
+        });
     } catch (error) {
         console.log("Error checking Main Server");
         return res.sendStatus(500);
@@ -116,7 +117,13 @@ app.post("/upload", upload.single("file"), async (req: Request, res: Response) =
             .from("images")
             .getPublicUrl(data.path).data.publicUrl;
 
-        return res.json({
+        // Getting the processed output from the VeriFace API
+        const response: AxiosResponse<any, any, {}> = await axios.post(
+            "http://localhost:8000/predict", { publicUrl: publicUrl }
+        )
+
+        return res.status(200).json({
+            message: response.data.message,
             url: publicUrl,
         });
     } catch (error) {
