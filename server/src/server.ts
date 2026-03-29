@@ -124,6 +124,8 @@ app.post("/upload", upload.single("file"), async (req: Request, res: Response) =
 
         return res.status(200).json({
             message: response.data.message,
+            class: response.data.class,
+            confidence: response.data.confidence,
             url: publicUrl,
         });
     } catch (error) {
