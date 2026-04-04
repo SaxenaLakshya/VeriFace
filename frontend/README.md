@@ -67,3 +67,5 @@ npm start
 | `index.html` entry | `app/layout.tsx` |
 | `src/pages/Index.tsx` | `app/page.tsx` → `components/HomePage.tsx` |
 | `src/pages/NotFound.tsx` | `app/not-found.tsx` |
+
+BY ABHINAV 
