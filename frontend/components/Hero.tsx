@@ -1,10 +1,5 @@
 import { Button } from "@/components/ui/button";
 
-interface HeroProps {
-  onTryScan: () => void;
-  onCreateAccount: () => void;
-}
-
 const stats = [
   { num: "99.2%", label: "Detection Accuracy" },
   { num: "10K+", label: "Verified Images" },
@@ -12,7 +7,7 @@ const stats = [
   { num: "50+", label: "AI Models Detected" },
 ];
 
-export default function Hero({ onTryScan, onCreateAccount }: HeroProps) {
+export default function Hero() {
   return (
     <section
       id="try-it"
@@ -51,7 +46,6 @@ export default function Hero({ onTryScan, onCreateAccount }: HeroProps) {
           variant="hero"
           size="lg"
           className="px-9 py-4"
-          onClick={onTryScan}
         >
           TRY FREE SCAN →
         </Button>
@@ -59,7 +53,6 @@ export default function Hero({ onTryScan, onCreateAccount }: HeroProps) {
           variant="heroGhost"
           size="lg"
           className="px-9 py-4"
-          onClick={onCreateAccount}
         >
           Create Account
         </Button>
