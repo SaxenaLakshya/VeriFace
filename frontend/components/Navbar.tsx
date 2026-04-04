@@ -3,6 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import {
+  SignInButton,
+  SignUpButton,
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
 
 const LogoIcon = () => (
   <div className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-[hsl(185,100%,50%)] to-[hsl(210,100%,50%)] flex items-center justify-center flex-shrink-0">
@@ -21,13 +27,9 @@ const LogoIcon = () => (
   </div>
 );
 
-interface NavbarProps {
-  onSignIn: () => void;
-  onSignUp: () => void;
-}
-
-export default function Navbar({ onSignIn, onSignUp }: NavbarProps) {
+export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isSignedIn } = useUser();
 
   const navLinks = [
     { label: "Try It", href: "#try-it" },
@@ -39,6 +41,7 @@ export default function Navbar({ onSignIn, onSignUp }: NavbarProps) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-[200] bg-[hsl(240,40%,3%,0.75)] backdrop-blur-xl border-b border-[hsl(0,0%,100%,0.07)]">
       <div className="max-w-[1280px] mx-auto px-8 h-[68px] flex items-center justify-between">
+        
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 no-underline">
           <LogoIcon />
@@ -63,19 +66,31 @@ export default function Navbar({ onSignIn, onSignUp }: NavbarProps) {
           ))}
         </div>
 
-        {/* CTA Buttons */}
+        {/* Auth Section */}
         <div className="flex items-center gap-2">
-          <Button variant="nav" size="sm" className="px-5" onClick={onSignIn}>
-            Sign In
-          </Button>
-          <Button
-            variant="navCta"
-            size="sm"
-            className="px-5"
-            onClick={onSignUp}
-          >
-            GET STARTED →
-          </Button>
+          {!isSignedIn ? (
+            <>
+              <SignInButton mode="modal">
+                <Button variant="nav" size="sm" className="px-5">
+                  Sign In
+                </Button>
+              </SignInButton>
+
+              <SignUpButton mode="modal">
+                <Button variant="navCta" size="sm" className="px-5">
+                  GET STARTED →
+                </Button>
+              </SignUpButton>
+            </>
+          ) : (
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: "w-9 h-9",
+                },
+              }}
+            />
+          )}
         </div>
       </div>
     </nav>
