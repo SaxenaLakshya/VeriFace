@@ -18,7 +18,7 @@ const spaceMono = Space_Mono({
 
 const syne = Syne({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "500", "600"] as const,
   variable: "--font-syne",
   display: "swap",
 });
