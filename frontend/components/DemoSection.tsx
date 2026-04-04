@@ -12,11 +12,7 @@ interface Result {
   detail: string;
 }
 
-interface DemoSectionProps {
-  onSaveHistory: () => void;
-}
-
-export default function DemoSection({ onSaveHistory }: DemoSectionProps) {
+export default function DemoSection() {
   const [phase, setPhase] = useState<Phase>("upload");
   const [image, setImage] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
@@ -274,7 +270,7 @@ export default function DemoSection({ onSaveHistory }: DemoSectionProps) {
               <Button variant="hero" onClick={reset}>
                 SCAN ANOTHER
               </Button>
-              <Button variant="heroGhost" onClick={onSaveHistory}>
+              <Button variant="heroGhost">
                 Save History →
               </Button>
               <Button
