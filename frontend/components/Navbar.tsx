@@ -32,6 +32,7 @@ export default function Navbar() {
   const { isSignedIn } = useUser();
 
   const navLinks = [
+    { label: "Home", href: "/" },
     { label: "Scan", href: "/scan" },
     { label: "Features", href: "/features" },
     { label: "How It Works", href: "/how" },
