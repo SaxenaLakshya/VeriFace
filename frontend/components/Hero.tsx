@@ -1,4 +1,7 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
+import { SignUpButton, SignInButton, useUser } from "@clerk/nextjs";
 
 const stats = [
   { num: "99.2%", label: "Detection Accuracy" },
@@ -8,6 +11,8 @@ const stats = [
 ];
 
 export default function Hero() {
+  const { isSignedIn } = useUser();
+
   return (
     <section
       id="try-it"
@@ -16,7 +21,7 @@ export default function Hero() {
       {/* Badge */}
       <div className="animate-fade-up delay-1 inline-flex items-center gap-2 px-4 py-1.5 pl-2 bg-[hsl(185,100%,50%,0.06)] border border-[hsl(185,100%,50%,0.15)] rounded-full font-space text-xs text-[hsl(185,100%,50%,0.8)] mb-7">
         <span className="w-2 h-2 bg-[hsl(120,100%,54%)] rounded-full shadow-[0_0_8px_hsl(120,100%,54%)] animate-blink" />
-        VeriFace ML — v2.4.1 Live
+        VeriFace — v1.0.0 Live
       </div>
 
       {/* Headline */}
@@ -42,20 +47,33 @@ export default function Hero() {
 
       {/* CTAs */}
       <div className="animate-fade-up delay-3 flex flex-wrap gap-3.5 justify-center mb-[72px]">
-        <Button
-          variant="hero"
-          size="lg"
-          className="px-9 py-4"
-        >
-          TRY FREE SCAN →
-        </Button>
-        <Button
-          variant="heroGhost"
-          size="lg"
-          className="px-9 py-4"
-        >
-          Create Account
-        </Button>
+        
+        {/* Try Scan */}
+        {!isSignedIn ? (
+          <SignInButton mode="modal">
+            <Button variant="hero" size="lg" className="px-9 py-4">
+              TRY FREE SCAN →
+            </Button>
+          </SignInButton>
+        ) : (
+          <Button
+            variant="hero"
+            size="lg"
+            className="px-9 py-4"
+            onClick={() => (window.location.href = "/dashboard")}
+          >
+            TRY FREE SCAN →
+          </Button>
+        )}
+
+        {/* Create Account */}
+        {!isSignedIn && (
+          <SignUpButton mode="modal">
+            <Button variant="heroGhost" size="lg" className="px-9 py-4">
+              Create Account
+            </Button>
+          </SignUpButton>
+        )}
       </div>
 
       {/* Stats */}

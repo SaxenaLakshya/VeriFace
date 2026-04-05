@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Orbitron, Space_Mono, Syne } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const orbitron = Orbitron({
     subsets: ["latin"],
@@ -50,8 +52,6 @@ export default function RootLayout({
                     colorBackground: "#f8fafc",
                     colorInputBackground: "#ffffff",
                     colorInputText: "#0f172a",
-
-                    borderRadius: "20px",
                 },
 
                 elements: {
@@ -73,7 +73,9 @@ export default function RootLayout({
         >
             <html lang="en" className="dark">
                 <body className={`${orbitron.variable} ${spaceMono.variable} ${syne.variable} antialiased`}>
+                    <Navbar />
                     {children}
+                    <Footer />
                 </body>
             </html>
         </ClerkProvider>

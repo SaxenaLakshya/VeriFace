@@ -24,14 +24,12 @@ export default function HomePage() {
       <div className="orb orb-purple" />
       <div className="orb orb-blue" />
 
-      <Navbar />
       <Hero />
       <Marquee />
       <DemoSection />
       <Features />
       <HowItWorks />
       <Testimonials />
-      <Footer />
 
     </>
   );
