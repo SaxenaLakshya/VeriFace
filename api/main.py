@@ -42,7 +42,7 @@ def get_model_prediction(image):
     # Prediction
     pred_class = int(np.argmax(probs, axis=1)[0])
     confidence = float(probs[0, pred_class])
-    return pred_class, confidence
+    return pred_class, round(confidence, 2)
 
 # Health Route
 @app.get("/")
