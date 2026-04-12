@@ -6,3 +6,10 @@ export type ClerkData = {
     image_url?: string,
     eventType: string,
 }
+
+export type ReviewData = {
+    name: string,
+    profession: string,
+    place: string,
+    review: string,
+}

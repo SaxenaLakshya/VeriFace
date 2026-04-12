@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import multer from "multer";
 import axios, { AxiosResponse } from "axios";
 import { client as supabase } from "./supabase/client";
-import { ClerkData } from "./types/types";
+import { ClerkData, ReviewData } from "./types/types";
 
 // Defining the Express.js
 const app = express();
@@ -131,6 +131,25 @@ app.post("/upload", upload.single("file"), async (req: Request, res: Response) =
     } catch (error) {
         console.log("Error uploading the image to Storage");
         return res.sendStatus(500);
+    }
+});
+
+// Registering the review given by the logged-in users
+app.post("/review", async (req: Request, res: Response) => {
+    const reviewData: ReviewData = req.body;
+    const {data, error} = await supabase.from("reviews").insert({
+        name: reviewData.name,
+        profession: reviewData.profession,
+        place: reviewData.place,
+        review: reviewData.review,
+    });
+
+    if (error) {
+        console.log("Error registering the review: ", error);
+        return res.sendStatus(500);
+    } else {
+        console.log("Review recorded successfully.");
+        return res.sendStatus(201);
     }
 });
 
