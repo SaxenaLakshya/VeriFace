@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
+    const serverUrl = process.env.SERVER_URL || "http://localhost:5000";
     try {
         const reviewData = await request.json();
 
-        const response = await fetch("http://localhost:5000/review", {
+        const response = await fetch(`${serverUrl}/review`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
