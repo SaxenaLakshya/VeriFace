@@ -2,10 +2,14 @@ import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import multer from "multer";
 import axios, { AxiosResponse } from "axios";
+import dotenv from "dotenv";
 import { client as supabase } from "./supabase/client";
 import { ClerkData, ReviewData } from "./types/types";
 
+dotenv.config();
+
 // Defining the Express.js
+const apiUrl = process.env.API_URL || "http://localhost:8000";
 const app = express();
 const upload = multer();
 
@@ -119,7 +123,7 @@ app.post("/upload", upload.single("file"), async (req: Request, res: Response) =
 
         // Getting the processed output from the VeriFace API
         const response: AxiosResponse<any, any, {}> = await axios.post(
-            "http://localhost:8000/predict", { publicUrl: publicUrl }
+            `${apiUrl}/predict`, { publicUrl: publicUrl }
         )
 
         return res.status(200).json({
