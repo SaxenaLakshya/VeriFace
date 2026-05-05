@@ -21,6 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.get("/", async (req: Request, res: Response) => {
     try {
         const { data, error } = await supabase.storage.getBucket("images");
+        const response: AxiosResponse<any, any, {}> = await axios.get(`${apiUrl}/`);
         let dbStatus: string = (error) ? "DB is currently down!" : "DB is running healthy!";
 
         return res.status(200).json({
@@ -28,7 +29,7 @@ app.get("/", async (req: Request, res: Response) => {
             "dbMessage": dbStatus,
         });
     } catch (error) {
-        console.log("Error checking Main Server");
+        console.log("Error checking Main Server, API, and DB.");
         return res.sendStatus(500);
     }
 });
