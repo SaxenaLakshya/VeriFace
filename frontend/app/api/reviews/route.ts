@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-    const serverUrl = process.env.SERVER_URL || "http://localhost:5000";
+    const serverUrl: string = process.env.SERVER_URL || "http://localhost:5000";
     try {
         const reviewData = await request.json();
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const serverUrl = process.env.SERVER_URL || "http://localhost:5000";
+  const serverUrl: string = process.env.SERVER_URL || "http://localhost:5000";
   try {
     // 1. Get form data from frontend
     const formData = await req.formData();
