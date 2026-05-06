@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import multer from "multer";
 import axios, { AxiosResponse } from "axios";
+import nodeCron from "node-cron";
 import dotenv from "dotenv";
 import { client as supabase } from "./supabase/client";
 import { ClerkData, ReviewData } from "./types/types";
@@ -33,6 +34,27 @@ app.get("/", async (req: Request, res: Response) => {
         return res.sendStatus(500);
     }
 });
+
+// Midnight NUKE
+async function runAtMidnight() {
+    try {
+        const {data, error} = await supabase.storage.emptyBucket("images");
+        if (error) {
+            console.log("Midnight NUKE failed!");
+        } else {
+            console.log("Midnight NUKE successful!");
+        }
+    } catch (error) {
+        console.log("Error running Midnight NUKE!");
+    }
+}
+
+// Scheduling the Midnight NUKE
+nodeCron.schedule('0 0 * * *', () => {
+    runAtMidnight();
+}, {
+    timezone: 'Asia/Kolkata'
+})
 
 // Webhook user data sending to Supabase
 app.post("/clerk", async (req: Request, res: Response) => {
