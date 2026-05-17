@@ -35,6 +35,9 @@ export const metadata: Metadata = {
         description: "Is it real or AI-generated? Find out in under 2 seconds.",
         type: "website",
     },
+    icons: {
+        icon: "/VeriFace Logo.svg",
+    },
 };
 
 export default function RootLayout({
