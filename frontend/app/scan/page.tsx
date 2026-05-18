@@ -20,48 +20,80 @@ export default function ScanPage() {
 
     // 📁 HANDLE FILE
     const handleFile = useCallback((selectedFile: File) => {
-
-        // file type validation
-        if (!selectedFile.type.startsWith("image/")) {
-            alert("Only image files are allowed");
-            return;
-        }
-
-        // file size validation
-        if (selectedFile.size > 10 * 1024 * 1024) {
-            alert("File must be under 10MB");
-            return;
-        }
-
-        // filename validation
-        const invalidName = /[^a-zA-Z0-9._-]/.test(selectedFile.name);
-
-        if (invalidName) {
-            alert(
-                "Please rename the file using simple characters only.\n\nAllowed:\n- letters\n- numbers\n- dash (-)\n- underscore (_)\n\nExample: photo.jpg"
-            );
-            return;
-        }
-
-        const reader = new FileReader();
-
-        reader.onerror = () => {
-            alert("Failed to read image");
-        };
-
-        reader.onload = (e) => {
-            if (!e.target?.result) {
-                alert("Invalid image");
+        try {
+            // -----------------------------
+            // FILE EXISTS
+            // -----------------------------
+            if (!selectedFile) {
+                alert("No file selected");
                 return;
             }
 
-            setImage(e.target.result as string);
-            setFile(selectedFile);
-            setResult(null);
-        };
+            // -----------------------------
+            // MAX SIZE = 10MB
+            // -----------------------------
+            const MAX_SIZE = 10 * 1024 * 1024;
 
-        reader.readAsDataURL(selectedFile);
+            if (selectedFile.size > MAX_SIZE) {
+                alert("File must be under 10MB");
+                return;
+            }
 
+            // -----------------------------
+            // VALID IMAGE CHECK
+            // Some desktop browsers return
+            // weird MIME types sometimes
+            // -----------------------------
+            const validMime = selectedFile.type.startsWith("image/");
+
+            const validExtension = /\.(jpg|jpeg|png|webp|gif|bmp|svg)$/i.test(
+                selectedFile.name,
+            );
+
+            if (!validMime && !validExtension) {
+                alert("Only image files are allowed");
+                return;
+            }
+
+            // -----------------------------
+            // READ FILE
+            // -----------------------------
+            const reader = new FileReader();
+
+            reader.onerror = () => {
+                console.error("FileReader failed");
+                alert("Failed to read image");
+            };
+
+            reader.onabort = () => {
+                console.error("FileReader aborted");
+                alert("Image reading was aborted");
+            };
+
+            reader.onload = (e) => {
+                try {
+                    const result = e.target?.result;
+
+                    if (!result || typeof result !== "string") {
+                        alert("Invalid image");
+                        return;
+                    }
+
+                    // SUCCESS
+                    setImage(result);
+                    setFile(selectedFile);
+                    setResult(null);
+                } catch (err) {
+                    console.error(err);
+                    alert("Failed to process image");
+                }
+            };
+
+            reader.readAsDataURL(selectedFile);
+        } catch (err) {
+            console.error(err);
+            alert("Unexpected error while loading image");
+        }
     }, []);
 
     // 🚀 API CALL
@@ -119,9 +151,7 @@ export default function ScanPage() {
                 result: data.result,
                 confidence: Math.round(data.confidence),
             });
-
         } catch (err: any) {
-
             console.error(err);
 
             if (err.name === "AbortError") {
@@ -129,7 +159,6 @@ export default function ScanPage() {
             } else {
                 alert(err.message || "Scan failed");
             }
-
         } finally {
             setLoading(false);
         }
@@ -149,7 +178,6 @@ export default function ScanPage() {
 
     return (
         <div className="min-h-screen bg-[hsl(240,40%,3%)] text-white px-6 py-24">
-
             {/* HEADER */}
             <div className="text-center mb-14">
                 <h1 className="font-orbitron text-[clamp(2.5rem,6vw,4rem)] font-black mb-3">
@@ -157,12 +185,12 @@ export default function ScanPage() {
                 </h1>
 
                 <p className="text-muted-foreground">
-                    Upload an image and let AI determine if it's real or generated
+                    Upload an image and let AI determine if it's real or
+                    generated
                 </p>
             </div>
 
             <div className="max-w-3xl mx-auto">
-
                 {/* UPLOAD BOX */}
                 {!result && (
                     <motion.div
@@ -178,13 +206,18 @@ export default function ScanPage() {
                         <input
                             ref={fileRef}
                             type="file"
-                            accept="image/*"
+                            accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/svg+xml"
                             className="hidden"
                             onChange={(e) => {
-                                const selected = e.target.files?.[0];
+                                try {
+                                    const selected = e.target.files?.[0];
 
-                                if (selected) {
+                                    if (!selected) return;
+
                                     handleFile(selected);
+                                } catch (err) {
+                                    console.error(err);
+                                    alert("Failed to select file");
                                 }
                             }}
                         />
@@ -195,18 +228,14 @@ export default function ScanPage() {
                                     📤
                                 </div>
 
-                                <p className="text-lg mb-1">
-                                    Upload Image
-                                </p>
+                                <p className="text-lg mb-1">Upload Image</p>
 
                                 <p className="text-sm text-muted-foreground">
                                     PNG · JPG · WEBP · max 10MB
                                 </p>
 
                                 <p className="text-xs text-yellow-400 mt-3">
-                                    Use simple file names (example: photo.jpg).
-                                    Complex names and special characters may cause
-                                    upload or storage issues.
+                                    Supports desktop and mobile uploads.
                                 </p>
                             </>
                         ) : (
@@ -227,7 +256,9 @@ export default function ScanPage() {
                                         }}
                                         className="hover:scale-[1.05] transition-transform disabled:opacity-50"
                                     >
-                                        {loading ? "Scanning..." : "⚡ Start Scan"}
+                                        {loading
+                                            ? "Scanning..."
+                                            : "⚡ Start Scan"}
                                     </Button>
 
                                     <Button
@@ -287,10 +318,11 @@ export default function ScanPage() {
                         </div>
 
                         <div
-                            className={`inline-block px-5 py-2 rounded-xl font-bold transition-all ${result.result.toUpperCase() === "REAL"
+                            className={`inline-block px-5 py-2 rounded-xl font-bold transition-all ${
+                                result.result.toUpperCase() === "REAL"
                                     ? "bg-[hsl(120,100%,54%,0.12)] text-[hsl(120,100%,54%)] border border-[hsl(120,100%,54%,0.4)] shadow-[0_0_20px_hsl(120,100%,54%,0.25)]"
                                     : "bg-[hsl(290,70%,50%,0.12)] text-[hsl(290,70%,50%)] border border-[hsl(290,70%,50%,0.4)] shadow-[0_0_25px_hsl(290,70%,50%,0.35)]"
-                                }`}
+                            }`}
                         >
                             {result.result}
                         </div>
