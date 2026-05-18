@@ -19,57 +19,132 @@ export default function ScanPage() {
     const fileRef = useRef<HTMLInputElement>(null);
 
     // 📁 HANDLE FILE
-    const handleFile = useCallback((file: File) => {
-        if (!file.type.startsWith("image/")) return;
+    const handleFile = useCallback((selectedFile: File) => {
 
-        if (file.size > 10 * 1024 * 1024) {
+        // file type validation
+        if (!selectedFile.type.startsWith("image/")) {
+            alert("Only image files are allowed");
+            return;
+        }
+
+        // file size validation
+        if (selectedFile.size > 10 * 1024 * 1024) {
             alert("File must be under 10MB");
             return;
         }
 
+        // filename validation
+        const invalidName = /[^a-zA-Z0-9._-]/.test(selectedFile.name);
+
+        if (invalidName) {
+            alert(
+                "Please rename the file using simple characters only.\n\nAllowed:\n- letters\n- numbers\n- dash (-)\n- underscore (_)\n\nExample: photo.jpg"
+            );
+            return;
+        }
+
         const reader = new FileReader();
-        reader.onload = (e) => {
-            setImage(e.target?.result as string);
-            setFile(file);
-            setResult(null); // reset old result
+
+        reader.onerror = () => {
+            alert("Failed to read image");
         };
-        reader.readAsDataURL(file);
+
+        reader.onload = (e) => {
+            if (!e.target?.result) {
+                alert("Invalid image");
+                return;
+            }
+
+            setImage(e.target.result as string);
+            setFile(selectedFile);
+            setResult(null);
+        };
+
+        reader.readAsDataURL(selectedFile);
+
     }, []);
 
     // 🚀 API CALL
     const handleScan = async () => {
-        if (!file) return;
+        if (!file || loading) return;
 
         setLoading(true);
+        setResult(null);
 
         try {
             const formData = new FormData();
             formData.append("file", file);
 
+            // timeout protection
+            const controller = new AbortController();
+
+            const timeout = setTimeout(() => {
+                controller.abort();
+            }, 30000);
+
             const res = await fetch("/api/scan", {
                 method: "POST",
                 body: formData,
+                signal: controller.signal,
             });
 
-            const data = await res.json();
+            clearTimeout(timeout);
+
+            // HTTP failure
+            if (!res.ok) {
+                throw new Error(`Server error (${res.status})`);
+            }
+
+            // invalid JSON protection
+            let data;
+
+            try {
+                data = await res.json();
+            } catch {
+                throw new Error("Invalid server response");
+            }
+
+            // response validation
+            if (
+                !data ||
+                typeof data.imageUrl !== "string" ||
+                typeof data.result !== "string" ||
+                typeof data.confidence !== "number"
+            ) {
+                throw new Error("Malformed API response");
+            }
 
             setResult({
                 imageUrl: data.imageUrl,
                 result: data.result,
-                confidence: data.confidence,
+                confidence: Math.round(data.confidence),
             });
-        } catch (err) {
-            console.error(err);
-        }
 
-        setLoading(false);
+        } catch (err: any) {
+
+            console.error(err);
+
+            if (err.name === "AbortError") {
+                alert("Request timed out");
+            } else {
+                alert(err.message || "Scan failed");
+            }
+
+        } finally {
+            setLoading(false);
+        }
     };
 
+    // 🔄 RESET
     const reset = () => {
         setImage(null);
         setFile(null);
         setResult(null);
         setLoading(false);
+
+        if (fileRef.current) {
+            fileRef.current.value = "";
+        }
     };
 
     return (
@@ -80,6 +155,7 @@ export default function ScanPage() {
                 <h1 className="font-orbitron text-[clamp(2.5rem,6vw,4rem)] font-black mb-3">
                     SCAN IMAGE
                 </h1>
+
                 <p className="text-muted-foreground">
                     Upload an image and let AI determine if it's real or generated
                 </p>
@@ -88,65 +164,88 @@ export default function ScanPage() {
             <div className="max-w-3xl mx-auto">
 
                 {/* UPLOAD BOX */}
-                <motion.div
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="border-2 border-dashed border-[hsl(185,100%,50%,0.25)] rounded-[24px] p-10 text-center bg-[hsl(240,30%,5%,0.5)] backdrop-blur-xl cursor-pointer hover:border-[hsl(185,100%,50%)] transition-all"
-                    onClick={() => fileRef.current?.click()}
-                >
-                    <input
-                        ref={fileRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) =>
-                            e.target.files?.[0] && handleFile(e.target.files[0])
-                        }
-                    />
+                {!result && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="border-2 border-dashed border-[hsl(185,100%,50%,0.25)] rounded-[24px] p-10 text-center bg-[hsl(240,30%,5%,0.5)] backdrop-blur-xl cursor-pointer hover:border-[hsl(185,100%,50%)] transition-all"
+                        onClick={() => {
+                            if (!loading) {
+                                fileRef.current?.click();
+                            }
+                        }}
+                    >
+                        <input
+                            ref={fileRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                                const selected = e.target.files?.[0];
 
-                    {/* 🔥 FIX: Hide preview if result exists */}
-                    {!image || result ? (
-                        <>
-                            <div className="text-5xl mb-4 animate-float">📤</div>
-                            <p className="text-lg mb-1">Upload Image</p>
-                            <p className="text-sm text-muted-foreground">
-                                PNG · JPG · WEBP · max 10MB
-                            </p>
-                        </>
-                    ) : (
-                        <>
-                            <img
-                                src={image}
-                                alt="preview"
-                                className="max-h-[300px] mx-auto rounded-xl mb-6 shadow-[0_0_30px_rgba(0,255,255,0.1)]"
-                            />
+                                if (selected) {
+                                    handleFile(selected);
+                                }
+                            }}
+                        />
 
-                            <div className="flex gap-3 justify-center">
-                                <Button
-                                    variant="hero"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleScan();
-                                    }}
-                                    className="hover:scale-[1.05] transition-transform"
-                                >
-                                    ⚡ Start Scan
-                                </Button>
+                        {!image ? (
+                            <>
+                                <div className="text-5xl mb-4 animate-float">
+                                    📤
+                                </div>
 
-                                <Button
-                                    variant="heroGhost"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        reset();
-                                    }}
-                                    className="hover:scale-[1.05] transition-transform"
-                                >
-                                    Remove
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                </motion.div>
+                                <p className="text-lg mb-1">
+                                    Upload Image
+                                </p>
+
+                                <p className="text-sm text-muted-foreground">
+                                    PNG · JPG · WEBP · max 10MB
+                                </p>
+
+                                <p className="text-xs text-yellow-400 mt-3">
+                                    Use simple file names (example: photo.jpg).
+                                    Complex names and special characters may cause
+                                    upload or storage issues.
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <img
+                                    src={image}
+                                    alt="preview"
+                                    className="max-h-[300px] mx-auto rounded-xl mb-6 shadow-[0_0_30px_rgba(0,255,255,0.1)]"
+                                />
+
+                                <div className="flex gap-3 justify-center">
+                                    <Button
+                                        variant="hero"
+                                        disabled={loading}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleScan();
+                                        }}
+                                        className="hover:scale-[1.05] transition-transform disabled:opacity-50"
+                                    >
+                                        {loading ? "Scanning..." : "⚡ Start Scan"}
+                                    </Button>
+
+                                    <Button
+                                        variant="heroGhost"
+                                        disabled={loading}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            reset();
+                                        }}
+                                        className="hover:scale-[1.05] transition-transform disabled:opacity-50"
+                                    >
+                                        Remove
+                                    </Button>
+                                </div>
+                            </>
+                        )}
+                    </motion.div>
+                )}
 
                 {/* LOADING */}
                 {loading && (
@@ -177,9 +276,9 @@ export default function ScanPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="mt-10 p-8 rounded-[24px] bg-[hsl(240,30%,5%,0.6)] border border-[hsl(185,100%,50%,0.2)] text-center backdrop-blur-xl"
                     >
-                        {/* ✅ ONLY ONE IMAGE */}
                         <img
                             src={result.imageUrl}
+                            alt="scan result"
                             className="max-h-[260px] mx-auto rounded-xl mb-6 shadow-[0_0_40px_rgba(0,0,0,0.5)]"
                         />
 
@@ -187,9 +286,8 @@ export default function ScanPage() {
                             {result.confidence}% Confidence
                         </div>
 
-                        {/* 🔥 FIXED LABEL */}
                         <div
-                            className={`inline-block px-5 py-2 rounded-xl font-bold transition-all ${result.result.toUpperCase().includes("REAL")
+                            className={`inline-block px-5 py-2 rounded-xl font-bold transition-all ${result.result.toUpperCase() === "REAL"
                                     ? "bg-[hsl(120,100%,54%,0.12)] text-[hsl(120,100%,54%)] border border-[hsl(120,100%,54%,0.4)] shadow-[0_0_20px_hsl(120,100%,54%,0.25)]"
                                     : "bg-[hsl(290,70%,50%,0.12)] text-[hsl(290,70%,50%)] border border-[hsl(290,70%,50%,0.4)] shadow-[0_0_25px_hsl(290,70%,50%,0.35)]"
                                 }`}
