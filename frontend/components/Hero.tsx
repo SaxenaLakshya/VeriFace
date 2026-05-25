@@ -21,7 +21,7 @@ export default function Hero() {
       {/* Badge */}
       <div className="animate-fade-up delay-1 inline-flex items-center gap-2 px-4 py-1.5 pl-2 bg-[hsl(185,100%,50%,0.06)] border border-[hsl(185,100%,50%,0.15)] rounded-full font-space text-xs text-[hsl(185,100%,50%,0.8)] mb-7">
         <span className="w-2 h-2 bg-[hsl(120,100%,54%)] rounded-full shadow-[0_0_8px_hsl(120,100%,54%)] animate-blink" />
-        VeriFace — v1.0.0 Live
+        VeriFace — v1.0.1 Live
       </div>
 
       {/* Headline */}
