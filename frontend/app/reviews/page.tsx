@@ -12,6 +12,30 @@ type ReviewFormData = {
   review: string;
 };
 
+const featuredReviews = [
+  {
+    review:
+      "We plugged VeriFace into our release checks last month. It caught two deepfake profile images our manual review missed, and the REST API fit our existing Node stack without rework.",
+    name: "Lakshya Saxena",
+    profession: "Software Engineer",
+    place: "Delhi",
+  },
+  {
+    review:
+      "I run weekly tests on synthetic face datasets. VeriFace consistently surfaces subtle blending artifacts around the jawline that our older classifier overlooked—useful for validating new detection papers.",
+    name: "Abhinav Shakya",
+    profession: "Associate Researcher",
+    place: "Ghaziabad",
+  },
+  {
+    review:
+      "Clear confidence breakdowns made it straightforward to document what users should expect. I could explain false positives and safe thresholds in our internal wiki without hand-waving the model behavior.",
+    name: "Himanshu Sharma",
+    profession: "Documentation Engineer",
+    place: "Faridabad",
+  },
+];
+
 export default function ReviewsPage() {
   const [submitted, setSubmitted] = useState(false);
 
@@ -146,7 +170,7 @@ export default function ReviewsPage() {
 
       {/* REVIEWS GRID */}
       <div className="relative z-10 max-w-6xl mx-auto mt-24 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3].map((_, i) => (
+        {featuredReviews.map((item, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 40 }}
@@ -155,14 +179,14 @@ export default function ReviewsPage() {
             className="group p-6 rounded-2xl border border-[hsl(0,0%,100%,0.06)] bg-[hsl(240,30%,5%,0.6)] backdrop-blur-xl hover:border-[hsl(185,100%,50%,0.4)] hover:shadow-[0_0_60px_hsl(185,100%,50%,0.15)] transition-all"
           >
             <p className="text-sm text-muted-foreground mb-4">
-              “This platform is insanely accurate. Helped me detect fake AI images instantly.”
+              “{item.review}”
             </p>
 
             <div className="text-xs text-[hsl(185,100%,50%)] font-semibold">
-              John Doe
+              {item.name}
             </div>
             <div className="text-[0.65rem] text-muted-foreground">
-              Data Analyst · USA
+              {item.profession} · {item.place}
             </div>
           </motion.div>
         ))}
