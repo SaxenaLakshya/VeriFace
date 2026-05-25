@@ -56,6 +56,8 @@ VeriFace/
 
 ## 🔄 Data Flow
 
+<img width="2201" height="1047" alt="Data Flow Diagram" src="https://github.com/user-attachments/assets/5c4fc935-1d8c-4ae3-8fef-77e439304919" />
+
 ```
 User uploads image
        ↓
@@ -109,18 +111,6 @@ cd api
 pip install -r requirements.txt
 python main.py
 ```
-
----
-
-## 📊 Language Breakdown
-
-| Language | Usage |
-|---|---|
-| TypeScript | 76.5% |
-| Jupyter Notebook | 16.3% |
-| CSS | 5.2% |
-| Python | 1.8% |
-| JavaScript | 0.2% |
 
 ---
 
