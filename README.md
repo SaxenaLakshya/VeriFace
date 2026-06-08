@@ -133,5 +133,5 @@ This project is open source. See the repository for details.
 ---
 
 <div align="center">
-  Made with ❤️ by <a href="https://github.com/SaxenaLakshya">SaxenaLakshya</a>
+  Made with ❤️ by <a href="https://github.com/SaxenaLakshya">Lakshya Saxena</a> and <a href="https://github.com/abhinav-123457">Abhinav Shakya</a>
 </div>
