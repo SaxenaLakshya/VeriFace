@@ -67,7 +67,7 @@ export default function ReviewsPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[hsl(240,40%,3%)] text-white px-6 py-24 overflow-hidden">
+      <div className="relative min-h-screen overflow-hidden bg-[hsl(240,40%,3%)] px-4 py-20 text-white sm:px-6 lg:px-8">
 
       {/* 🌌 BACKGROUND GLOW */}
       <div className="absolute inset-0 z-0">
@@ -76,11 +76,11 @@ export default function ReviewsPage() {
       </div>
 
       {/* HEADER */}
-      <div className="relative z-10 max-w-4xl mx-auto text-center mb-20">
+          <div className="relative z-10 mx-auto mb-14 max-w-4xl text-center sm:mb-20">
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          className="font-orbitron text-[clamp(3rem,7vw,5rem)] font-black mb-4"
+                  className="mb-4 font-orbitron text-[clamp(2.2rem,10vw,5rem)] font-black leading-tight"
         >
           COMMUNITY{" "}
           <span className="text-[hsl(185,100%,50%)] drop-shadow-[0_0_40px_hsl(185,100%,50%)]">
@@ -97,7 +97,7 @@ export default function ReviewsPage() {
       <motion.div
         initial={{ opacity: 0, y: 60 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 max-w-3xl mx-auto p-10 rounded-3xl border border-[hsl(185,100%,50%,0.15)] bg-[hsl(240,30%,5%,0.65)] backdrop-blur-xl overflow-hidden"
+              className="relative z-10 mx-auto max-w-3xl rounded-3xl border border-[hsl(185,100%,50%,0.15)] bg-[hsl(240,30%,5%,0.65)] p-5 backdrop-blur-xl sm:p-8 lg:p-10 overflow-hidden"
       >
         {/* glow border */}
         <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-[hsl(185,100%,50%,0.15)] to-[hsl(290,70%,50%,0.15)] blur-xl opacity-50" />
@@ -118,16 +118,16 @@ export default function ReviewsPage() {
           </div>
 
           {/* Row */}
-          <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
             <input
               {...register("profession", { required: true })}
               placeholder="Profession"
-              className="px-4 py-3 rounded-xl bg-[hsl(0,0%,100%,0.04)] border border-[hsl(0,0%,100%,0.08)] focus:border-[hsl(185,100%,50%)] outline-none"
+                          className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 outline-none transition focus:border-cyan-400"
             />
             <input
               {...register("place", { required: true })}
               placeholder="Location"
-              className="px-4 py-3 rounded-xl bg-[hsl(0,0%,100%,0.04)] border border-[hsl(0,0%,100%,0.08)] focus:border-[hsl(185,100%,50%)] outline-none"
+                          className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 outline-none transition focus:border-cyan-400"
             />
           </div>
 
@@ -169,7 +169,7 @@ export default function ReviewsPage() {
       </motion.div>
 
       {/* REVIEWS GRID */}
-      <div className="relative z-10 max-w-6xl mx-auto mt-24 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="relative z-10 mx-auto mt-16 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:mt-24">
         {featuredReviews.map((item, i) => (
           <motion.div
             key={i}
@@ -178,7 +178,7 @@ export default function ReviewsPage() {
             transition={{ delay: i * 0.1 }}
             className="group p-6 rounded-2xl border border-[hsl(0,0%,100%,0.06)] bg-[hsl(240,30%,5%,0.6)] backdrop-blur-xl hover:border-[hsl(185,100%,50%,0.4)] hover:shadow-[0_0_60px_hsl(185,100%,50%,0.15)] transition-all"
           >
-            <p className="text-sm text-muted-foreground mb-4">
+                <p className="mb-5 text-[15px] leading-7 text-muted-foreground">
               “{item.review}”
             </p>
 

@@ -21,31 +21,18 @@ export default function ScanPage() {
     // 📁 HANDLE FILE
     const handleFile = useCallback((selectedFile: File) => {
         try {
-            // -----------------------------
-            // FILE EXISTS
-            // -----------------------------
             if (!selectedFile) {
                 alert("No file selected");
                 return;
             }
 
-            // -----------------------------
-            // MAX SIZE = 10MB
-            // -----------------------------
             const MAX_SIZE = 10 * 1024 * 1024;
-
             if (selectedFile.size > MAX_SIZE) {
                 alert("File must be under 10MB");
                 return;
             }
 
-            // -----------------------------
-            // VALID IMAGE CHECK
-            // Some desktop browsers return
-            // weird MIME types sometimes
-            // -----------------------------
             const validMime = selectedFile.type.startsWith("image/");
-
             const validExtension = /\.(jpg|jpeg|png|webp|gif|bmp|svg)$/i.test(
                 selectedFile.name,
             );
@@ -55,9 +42,6 @@ export default function ScanPage() {
                 return;
             }
 
-            // -----------------------------
-            // READ FILE
-            // -----------------------------
             const reader = new FileReader();
 
             reader.onerror = () => {
@@ -73,13 +57,10 @@ export default function ScanPage() {
             reader.onload = (e) => {
                 try {
                     const result = e.target?.result;
-
                     if (!result || typeof result !== "string") {
                         alert("Invalid image");
                         return;
                     }
-
-                    // SUCCESS
                     setImage(result);
                     setFile(selectedFile);
                     setResult(null);
@@ -107,12 +88,8 @@ export default function ScanPage() {
             const formData = new FormData();
             formData.append("file", file);
 
-            // timeout protection
             const controller = new AbortController();
-
-            const timeout = setTimeout(() => {
-                controller.abort();
-            }, 30000);
+            const timeout = setTimeout(() => controller.abort(), 30000);
 
             const res = await fetch("/api/scan", {
                 method: "POST",
@@ -122,21 +99,15 @@ export default function ScanPage() {
 
             clearTimeout(timeout);
 
-            // HTTP failure
-            if (!res.ok) {
-                throw new Error(`Server error (${res.status})`);
-            }
+            if (!res.ok) throw new Error(`Server error (${res.status})`);
 
-            // invalid JSON protection
             let data;
-
             try {
                 data = await res.json();
             } catch {
                 throw new Error("Invalid server response");
             }
 
-            // response validation
             if (
                 !data ||
                 typeof data.imageUrl !== "string" ||
@@ -153,11 +124,10 @@ export default function ScanPage() {
             });
         } catch (err: any) {
             console.error(err);
-
             if (err.name === "AbortError") {
-                alert("Request timed out");
+                alert("Request timed out. Please try again.");
             } else {
-                alert(err.message || "Scan failed");
+                alert(err.message || "Scan failed. Please try again.");
             }
         } finally {
             setLoading(false);
@@ -170,23 +140,18 @@ export default function ScanPage() {
         setFile(null);
         setResult(null);
         setLoading(false);
-
-        if (fileRef.current) {
-            fileRef.current.value = "";
-        }
+        if (fileRef.current) fileRef.current.value = "";
     };
 
     return (
-        <div className="min-h-screen bg-[hsl(240,40%,3%)] text-white px-6 py-24">
+        <div className="min-h-screen bg-[hsl(240,40%,3%)] text-white px-4 sm:px-6 pt-24 sm:pt-32 pb-12 sm:pb-24">
             {/* HEADER */}
-            <div className="text-center mb-14">
-                <h1 className="font-orbitron text-[clamp(2.5rem,6vw,4rem)] font-black mb-3">
+            <div className="text-center mb-8 sm:mb-14">
+                <h1 className="font-orbitron text-[clamp(2rem,8vw,4rem)] font-black mb-2 sm:mb-3 leading-tight">
                     SCAN IMAGE
                 </h1>
-
-                <p className="text-muted-foreground">
-                    Upload an image and let AI determine if it's real or
-                    generated
+                <p className="text-muted-foreground text-sm sm:text-base px-2">
+                    Upload a photo and let AI check if it's real or AI-generated
                 </p>
             </div>
 
@@ -196,24 +161,22 @@ export default function ScanPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="border-2 border-dashed border-[hsl(185,100%,50%,0.25)] rounded-[24px] p-10 text-center bg-[hsl(240,30%,5%,0.5)] backdrop-blur-xl cursor-pointer hover:border-[hsl(185,100%,50%)] transition-all"
+                        className="border-2 border-dashed border-[hsl(185,100%,50%,0.25)] rounded-[20px] sm:rounded-[24px] p-6 sm:p-10 text-center bg-[hsl(240,30%,5%,0.5)] backdrop-blur-xl cursor-pointer hover:border-[hsl(185,100%,50%)] active:border-[hsl(185,100%,50%)] transition-all"
                         onClick={() => {
-                            if (!loading) {
-                                fileRef.current?.click();
-                            }
+                            if (!loading) fileRef.current?.click();
                         }}
                     >
+                        {/* Hidden file input — allows both gallery & camera on mobile */}
                         <input
                             ref={fileRef}
                             type="file"
                             accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/svg+xml"
+                            capture="environment"
                             className="hidden"
                             onChange={(e) => {
                                 try {
                                     const selected = e.target.files?.[0];
-
                                     if (!selected) return;
-
                                     handleFile(selected);
                                 } catch (err) {
                                     console.error(err);
@@ -224,29 +187,32 @@ export default function ScanPage() {
 
                         {!image ? (
                             <>
-                                <div className="text-5xl mb-4 animate-float">
-                                    📤
+                                <div className="text-5xl sm:text-6xl mb-4 animate-float">
+                                    📸
                                 </div>
 
-                                <p className="text-lg mb-1">Upload Image</p>
-
-                                <p className="text-sm text-muted-foreground">
-                                    PNG · JPG · WEBP · max 10MB
+                                <p className="text-base sm:text-lg font-semibold mb-1">
+                                    Tap to choose a photo
                                 </p>
 
-                                <p className="text-xs text-yellow-400 mt-3">
-                                    Supports desktop and mobile uploads.
+                                <p className="text-sm text-muted-foreground mb-1">
+                                    You can pick from your gallery or take a new photo
+                                </p>
+
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    PNG · JPG · WEBP · max 10MB
                                 </p>
                             </>
                         ) : (
                             <>
                                 <img
                                     src={image}
-                                    alt="preview"
-                                    className="max-h-[300px] mx-auto rounded-xl mb-6 shadow-[0_0_30px_rgba(0,255,255,0.1)]"
+                                    alt="Your selected photo"
+                                    className="max-h-[240px] sm:max-h-[300px] w-full object-contain mx-auto rounded-xl mb-5 shadow-[0_0_30px_rgba(0,255,255,0.1)]"
                                 />
 
-                                <div className="flex gap-3 justify-center">
+                                {/* Buttons stack on mobile, side-by-side on sm+ */}
+                                <div className="flex flex-col sm:flex-row gap-3 justify-center">
                                     <Button
                                         variant="hero"
                                         disabled={loading}
@@ -254,11 +220,9 @@ export default function ScanPage() {
                                             e.stopPropagation();
                                             handleScan();
                                         }}
-                                        className="hover:scale-[1.05] transition-transform disabled:opacity-50"
+                                        className="w-full sm:w-auto text-base py-3 px-6 hover:scale-[1.03] active:scale-[0.98] transition-transform disabled:opacity-50"
                                     >
-                                        {loading
-                                            ? "Scanning..."
-                                            : "⚡ Start Scan"}
+                                        {loading ? "Scanning…" : "⚡ Start Scan"}
                                     </Button>
 
                                     <Button
@@ -268,9 +232,9 @@ export default function ScanPage() {
                                             e.stopPropagation();
                                             reset();
                                         }}
-                                        className="hover:scale-[1.05] transition-transform disabled:opacity-50"
+                                        className="w-full sm:w-auto text-base py-3 px-6 hover:scale-[1.03] active:scale-[0.98] transition-transform disabled:opacity-50"
                                     >
-                                        Remove
+                                        Remove Photo
                                     </Button>
                                 </div>
                             </>
@@ -285,17 +249,17 @@ export default function ScanPage() {
                         animate={{ opacity: 1 }}
                         className="mt-8 text-center"
                     >
-                        <div className="flex justify-center gap-2 mb-3">
+                        <div className="flex justify-center gap-3 mb-3">
                             {[1, 2, 3].map((i) => (
                                 <div
                                     key={i}
-                                    className="w-2 h-2 rounded-full bg-[hsl(185,100%,50%)] animate-pulse shadow-[0_0_10px_hsl(185,100%,50%)]"
+                                    className="w-3 h-3 rounded-full bg-[hsl(185,100%,50%)] animate-pulse shadow-[0_0_10px_hsl(185,100%,50%)]"
+                                    style={{ animationDelay: `${i * 0.15}s` }}
                                 />
                             ))}
                         </div>
-
                         <p className="text-sm text-muted-foreground">
-                            Running AI models...
+                            Analysing your photo…
                         </p>
                     </motion.div>
                 )}
@@ -305,35 +269,46 @@ export default function ScanPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mt-10 p-8 rounded-[24px] bg-[hsl(240,30%,5%,0.6)] border border-[hsl(185,100%,50%,0.2)] text-center backdrop-blur-xl"
+                        className="mt-6 sm:mt-10 p-5 sm:p-8 rounded-[20px] sm:rounded-[24px] bg-[hsl(240,30%,5%,0.6)] border border-[hsl(185,100%,50%,0.2)] text-center backdrop-blur-xl"
                     >
                         <img
                             src={result.imageUrl}
-                            alt="scan result"
-                            className="max-h-[260px] mx-auto rounded-xl mb-6 shadow-[0_0_40px_rgba(0,0,0,0.5)]"
+                            alt="Scanned photo"
+                            className="max-h-[200px] sm:max-h-[260px] w-full object-contain mx-auto rounded-xl mb-5 shadow-[0_0_40px_rgba(0,0,0,0.5)]"
                         />
 
-                        <div className="text-xl font-orbitron mb-3">
-                            {result.confidence}% Confidence
+                        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
+                            AI Confidence
+                        </p>
+
+                        <div className="text-2xl sm:text-3xl font-orbitron font-bold mb-3">
+                            {result.confidence}%
                         </div>
 
                         <div
-                            className={`inline-block px-5 py-2 rounded-xl font-bold transition-all ${
-                                result.result.toUpperCase() === "REAL"
+                            className={`inline-block px-5 py-2 rounded-xl font-bold text-sm sm:text-base transition-all ${result.result.toUpperCase() === "REAL"
                                     ? "bg-[hsl(120,100%,54%,0.12)] text-[hsl(120,100%,54%)] border border-[hsl(120,100%,54%,0.4)] shadow-[0_0_20px_hsl(120,100%,54%,0.25)]"
                                     : "bg-[hsl(290,70%,50%,0.12)] text-[hsl(290,70%,50%)] border border-[hsl(290,70%,50%,0.4)] shadow-[0_0_25px_hsl(290,70%,50%,0.35)]"
-                            }`}
+                                }`}
                         >
-                            {result.result}
+                            {result.result.toUpperCase() === "REAL"
+                                ? "✅ Looks Real"
+                                : "🤖 Likely AI-Generated"}
                         </div>
+
+                        <p className="text-xs text-muted-foreground mt-3 px-4">
+                            {result.result.toUpperCase() === "REAL"
+                                ? "This image appears to be a genuine photo."
+                                : "This image shows signs of being AI-generated."}
+                        </p>
 
                         <div className="mt-6">
                             <Button
                                 variant="hero"
                                 onClick={reset}
-                                className="hover:scale-[1.05] transition-transform"
+                                className="w-full sm:w-auto text-base py-3 px-6 hover:scale-[1.03] active:scale-[0.98] transition-transform"
                             >
-                                Scan Another →
+                                Scan Another Photo →
                             </Button>
                         </div>
                     </motion.div>
