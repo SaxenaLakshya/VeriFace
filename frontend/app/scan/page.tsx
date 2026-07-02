@@ -171,7 +171,6 @@ export default function ScanPage() {
                             ref={fileRef}
                             type="file"
                             accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/svg+xml"
-                            capture="environment"
                             className="hidden"
                             onChange={(e) => {
                                 try {
