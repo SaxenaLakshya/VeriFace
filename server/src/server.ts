@@ -127,7 +127,7 @@ app.post("/upload", upload.single("file"), async (req: Request, res: Response) =
         }
 
         // Uploading the image to Supabase
-        const fileName = `${Date.now()}-${file!.originalname}`;
+        const fileName = new Date().toISOString().replace(/\D/g, "");
         const { data, error } = await supabase.storage
             .from("images")
             .upload(fileName, file!.buffer!, {
