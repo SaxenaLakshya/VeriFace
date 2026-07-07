@@ -10,11 +10,18 @@ type ScanResult = {
     confidence: number;
 };
 
+type RateLimit = {
+    success: boolean,
+    message: string,
+    retryAfter: number,
+};
+
 export default function ScanPage() {
     const [image, setImage] = useState<string | null>(null);
     const [file, setFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<ScanResult | null>(null);
+    const [rateLimit, setRateLimit] = useState<RateLimit | null>(null);
 
     const fileRef = useRef<HTMLInputElement>(null);
 
@@ -83,6 +90,7 @@ export default function ScanPage() {
 
         setLoading(true);
         setResult(null);
+        setRateLimit(null);
 
         try {
             const formData = new FormData();
@@ -99,7 +107,23 @@ export default function ScanPage() {
 
             clearTimeout(timeout);
 
-            if (!res.ok) throw new Error(`Server error (${res.status})`);
+            if (res.status === 429) {
+
+                const data = await res.json();
+
+                setRateLimit({
+                    success: data.success,
+                    message: data.message,
+                    retryAfter: data.retryAfter,
+                });
+
+                setLoading(false);
+                return;
+            }
+
+            if (!res.ok) {
+                throw new Error(`Server error (${res.status})`);
+            }
 
             let data;
             try {
@@ -139,6 +163,7 @@ export default function ScanPage() {
         setImage(null);
         setFile(null);
         setResult(null);
+        setRateLimit(null);
         setLoading(false);
         if (fileRef.current) fileRef.current.value = "";
     };
@@ -157,7 +182,7 @@ export default function ScanPage() {
 
             <div className="max-w-3xl mx-auto">
                 {/* UPLOAD BOX */}
-                {!result && (
+                {!result && !rateLimit && (
                     <motion.div
                         initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -286,8 +311,8 @@ export default function ScanPage() {
 
                         <div
                             className={`inline-block px-5 py-2 rounded-xl font-bold text-sm sm:text-base transition-all ${result.result.toUpperCase() === "REAL"
-                                    ? "bg-[hsl(120,100%,54%,0.12)] text-[hsl(120,100%,54%)] border border-[hsl(120,100%,54%,0.4)] shadow-[0_0_20px_hsl(120,100%,54%,0.25)]"
-                                    : "bg-[hsl(290,70%,50%,0.12)] text-[hsl(290,70%,50%)] border border-[hsl(290,70%,50%,0.4)] shadow-[0_0_25px_hsl(290,70%,50%,0.35)]"
+                                ? "bg-[hsl(120,100%,54%,0.12)] text-[hsl(120,100%,54%)] border border-[hsl(120,100%,54%,0.4)] shadow-[0_0_20px_hsl(120,100%,54%,0.25)]"
+                                : "bg-[hsl(290,70%,50%,0.12)] text-[hsl(290,70%,50%)] border border-[hsl(290,70%,50%,0.4)] shadow-[0_0_25px_hsl(290,70%,50%,0.35)]"
                                 }`}
                         >
                             {result.result.toUpperCase() === "REAL"
@@ -308,6 +333,41 @@ export default function ScanPage() {
                                 className="w-full sm:w-auto text-base py-3 px-6 hover:scale-[1.03] active:scale-[0.98] transition-transform"
                             >
                                 Scan Another Photo →
+                            </Button>
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* RATE LIMIT */}
+                {rateLimit && !loading && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-6 sm:mt-10 p-5 sm:p-8 rounded-[20px] sm:rounded-[24px] bg-[hsl(240,30%,5%,0.6)] border border-red-500/20 text-center backdrop-blur-xl"
+                    >
+                        <div className="text-6xl mb-5">
+                            ⏳
+                        </div>
+
+                        <h2 className="text-3xl font-orbitron font-bold text-red-400 mb-3">
+                            Rate Limit Reached
+                        </h2>
+
+                        <p className="text-muted-foreground mb-6">
+                            {rateLimit.message}
+                        </p>
+
+                        <div className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 font-semibold">
+                            Try again after{" "}
+                            {Math.ceil(rateLimit.retryAfter / 60)} minute(s)
+                        </div>
+
+                        <div className="mt-8">
+                            <Button
+                                variant="hero"
+                                onClick={reset}
+                            >
+                                Back
                             </Button>
                         </div>
                     </motion.div>

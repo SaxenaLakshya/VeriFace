@@ -6,6 +6,8 @@ import nodeCron from "node-cron";
 import dotenv from "dotenv";
 import { client as supabase } from "./supabase/client";
 import { ClerkData, ReviewData } from "./types/types";
+import redisClient from "./redis/client";
+import { RedisClient } from "redis";
 
 dotenv.config();
 
@@ -13,6 +15,10 @@ dotenv.config();
 const apiUrl = process.env.API_URL || "http://localhost:8000";
 const app = express();
 const upload = multer();
+
+// Rate Limit Stuff
+const RATE_LIMIT = 10;
+const WINDOW = 60 * 60; // 1 Hour
 
 // Middleware for processing data
 app.use(bodyParser.json({ limit: '10mb' }));
@@ -119,11 +125,36 @@ app.post("/clerk", async (req: Request, res: Response) => {
 app.post("/upload", upload.single("file"), async (req: Request, res: Response) => {
     try {
         const file = req.file;
+        const username = req.body.username;
+
+        // Username not found
+        if (!username) {
+            return res.status(400).json({
+                message: "Username is required."
+            });
+        }
 
         // File not found
         if (!file) {
             console.log("File not found!");
             return res.sendStatus(500);
+        }
+
+        // Redis Rate Limiter
+        const redisKey = `rate-limit:${username}`;
+        const requestCount = await redisClient.incr(redisKey);
+        // First Request: Start the 1 hour timer
+        if (requestCount === 1) {
+            await redisClient.expire(redisKey, WINDOW);
+        }
+        // User exceeded the limit
+        if (requestCount > RATE_LIMIT) {
+            const retryAfter = await redisClient.ttl(redisKey);
+            return res.status(429).json({
+                success: false,
+                message: "Hourly upload limit reached.",
+                retryAfter,
+            })
         }
 
         // Uploading the image to Supabase
