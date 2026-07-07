@@ -21,7 +21,7 @@ export default function Hero() {
             {/* Badge */}
             <div className="animate-fade-up delay-1 inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 pl-2 bg-[hsl(185,100%,50%,0.06)] border border-[hsl(185,100%,50%,0.15)] rounded-full font-space text-[0.65rem] sm:text-xs text-[hsl(185,100%,50%,0.8)] mb-5 sm:mb-7 text-center">
                 <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-[hsl(120,100%,54%)] rounded-full shadow-[0_0_8px_hsl(120,100%,54%)] animate-blink shrink-0" />
-                <span className="whitespace-nowrap">VeriFace — v1.1.3 Live</span>
+                <span className="whitespace-nowrap">VeriFace — v1.2.3 Live</span>
             </div>
 
             {/* Headline */}
