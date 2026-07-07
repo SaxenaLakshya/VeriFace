@@ -36,14 +36,19 @@ export async function POST(req: NextRequest) {
         if (response.status === 200) {
             responseData = {
                 imageUrl: data.url,
-                result: (data.class === "real") ? "REAL" : "AI-GENERATED",
+                result: data.class === "real" ? "REAL" : "AI-GENERATED",
                 confidence: data.confidence * 100,
             };
         } else if (response.status === 429) {
             responseData = {
                 success: data.success,
                 message: data.message,
-                retryAfter: data.retryAfter
+                retryAfter: data.retryAfter,
+            };
+        } else {
+            // don't silently swallow other errors
+            responseData = {
+                error: data.error || data.message || "Backend error",
             };
         }
 
