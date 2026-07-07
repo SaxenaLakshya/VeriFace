@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
         }
 
         // 6. Send response back to frontend (optional but useful)
-        return NextResponse.json(responseData);
+        return NextResponse.json(responseData, { status: response.status });
 
     } catch (error) {
         console.error("API Error:", error);
