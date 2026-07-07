@@ -97,7 +97,7 @@ export default function ScanPage() {
             formData.append("file", file);
 
             const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 30000);
+            const timeout = setTimeout(() => controller.abort(), 60000);
 
             const res = await fetch("/api/scan", {
                 method: "POST",

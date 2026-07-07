@@ -6,7 +6,7 @@ import { SignUpButton, SignInButton, useUser } from "@clerk/nextjs";
 const stats = [
     { num: "99.2%", label: "Detection Accuracy" },
     { num: "10K+", label: "Verified Images" },
-    { num: "<2s", label: "Scan Speed" },
+    { num: "<60s", label: "Scan Speed" },
     { num: "50+", label: "AI Models Detected" },
 ];
 
