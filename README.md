@@ -52,7 +52,7 @@ VeriFace/
 ---
  
 ## 🔄 Data Flow
-<img width="2201" height="1047" alt="Data Flow Diagram" src="https://github.com/user-attachments/assets/5c4fc935-1d8c-4ae3-8fef-77e439304919" />
+<img width="4953" height="3397" alt="VeriFace Architecture" src="https://github.com/user-attachments/assets/44ab36ae-f01a-41f0-842a-48c7d9584a6b" />
 ```
 User uploads image
        ↓
