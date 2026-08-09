@@ -1,0 +1,26 @@
+==================================================
+MODEL EVALUATION
+==================================================
+Total images : 973
+Accuracy     : 0.5683
+Precision    : 0.7045
+Recall       : 0.3803
+F1 Score     : 0.4940
+
+
+
+Classification Report:
+              precision    recall  f1-score   support
+
+          ai     0.7045    0.3803    0.4940       539
+        real     0.5103    0.8018    0.6237       434
+
+    accuracy                         0.5683       973
+   macro avg     0.6074    0.5911    0.5588       973
+weighted avg     0.6178    0.5683    0.5518       973
+
+
+
+Confusion Matrix:
+[[205 334]
+ [ 86 348]]
