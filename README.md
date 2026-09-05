@@ -52,7 +52,104 @@ VeriFace/
 ---
  
 ## 🔄 Data Flow
-<img width="4953" height="3397" alt="VeriFace Architecture" src="https://github.com/user-attachments/assets/44ab36ae-f01a-41f0-842a-48c7d9584a6b" />
+```mermaid
+flowchart LR
+
+%% =========================
+%% Client Application
+%% =========================
+subgraph CLIENT["Client Application"]
+    APP["🌐 Client App"]
+end
+
+%% =========================
+%% Backend Server
+%% =========================
+subgraph BACKEND["Backend Server"]
+    SERVER["⚙️ Server"]
+end
+
+%% =========================
+%% Authentication
+%% =========================
+subgraph AUTH["Authentication"]
+    CLERK["🔐 Clerk Auth"]
+end
+
+%% =========================
+%% Redis Rate Limiter
+%% =========================
+subgraph REDIS["Rate Limiting"]
+    REDISDB["🟥 Redis"]
+end
+
+%% =========================
+%% Image Verification
+%% =========================
+subgraph VERIFY["Image Verification Service"]
+    API["🤖 VeriFace API"]
+end
+
+%% =========================
+%% Database & Storage
+%% =========================
+subgraph STORAGE["Database & Storage"]
+    STORAGE_BUCKET[("📱 Supabase Storage")]
+    DATABASE[("📄 Supabase DB")]
+end
+
+%% =========================
+%% Client -> Backend
+%% =========================
+APP -- "📤 Upload Request" --> SERVER
+SERVER -- "📦 Response" --> APP
+
+%% =========================
+%% Authentication Flow
+%% =========================
+APP -- "Login / Signup" --> CLERK
+CLERK -- "JWT Session" --> APP
+
+%% =========================
+%% Clerk Webhook
+%% =========================
+CLERK -. "Webhook:\nUser Created / Updated" .-> DATABASE
+
+%% =========================
+%% Backend <-> Redis
+%% =========================
+SERVER -- "Check Rate Limit" --> REDISDB
+REDISDB -- "Allowed / Blocked\n(10 images/hour)" --> SERVER
+
+%% =========================
+%% Backend <-> Storage
+%% =========================
+SERVER -- "🖼 Upload Image" --> STORAGE_BUCKET
+STORAGE_BUCKET -- "🔗 Image URL" --> SERVER
+
+%% =========================
+%% Backend <-> AI Service
+%% =========================
+SERVER -- "🔗 Send Image URL" --> API
+API -- "✅ Verification Result" --> SERVER
+
+%% =========================
+%% Backend <-> Database
+%% =========================
+SERVER -- "Read / Write User Data" --> DATABASE
+
+%% =========================
+%% Styling
+%% =========================
+style APP fill:#F39C12,color:#fff,stroke:#C97A00,stroke-width:2px
+style SERVER fill:#4F46E5,color:#fff,stroke:#2D2AA5,stroke-width:2px
+style CLERK fill:#0EA5E9,color:#fff,stroke:#0369A1,stroke-width:2px
+style REDISDB fill:#DC2626,color:#fff,stroke:#991B1B,stroke-width:2px
+style API fill:#EF4444,color:#fff,stroke:#B91C1C,stroke-width:2px
+style STORAGE_BUCKET fill:#10B981,color:#fff,stroke:#047857,stroke-width:2px
+style DATABASE fill:#10B981,color:#fff,stroke:#047857,stroke-width:2px
+  
+```
 ```
 User uploads image
        ↓
